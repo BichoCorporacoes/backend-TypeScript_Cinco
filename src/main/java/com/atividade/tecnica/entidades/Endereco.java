@@ -20,17 +20,17 @@ public class Endereco {
 	private String Rua;
 	
 	@Column(nullable = false)
+	private String Bairro;
+	
+	@Column(nullable = false)
 	private String Cep;
 	
 	@Column(nullable = false)
-	private String Bairro;
-	
+	private String Cidade;
+
 	@Column(nullable = false)
 	private String Pais;
 	
 	@Column(nullable = false)
-	private String Cidade;
-	
-	@Column(nullable = false)
-	private String Numer;
+	private String Numero;
 }

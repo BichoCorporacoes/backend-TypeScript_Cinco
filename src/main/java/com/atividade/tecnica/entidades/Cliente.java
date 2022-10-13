@@ -3,8 +3,10 @@ package com.atividade.tecnica.entidades;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,7 +17,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class Cliente {
+public class Cliente{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,21 +30,21 @@ public class Cliente {
 	private String nomeSocial;
 	
 	@Column
-	private Boolean Titular;
+	private boolean Titular;
 	
-	@OneToMany
+	@OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Set<Documento> Documentos = new HashSet<>();
 	
-	@OneToMany
+	@OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Set<Telefone> Telefones = new HashSet<>();;
 	
-	@OneToMany
+	@OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Set<Cliente> Dependente = new HashSet<>();;
 	
-	@OneToOne
+	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	private Acomodacao Acomodacao;
 	
-	@OneToOne
+	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	private Endereco Endereco;
 	
 

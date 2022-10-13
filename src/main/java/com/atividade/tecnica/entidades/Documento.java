@@ -1,7 +1,5 @@
 package com.atividade.tecnica.entidades;
 
-import java.sql.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -24,7 +22,7 @@ public class Documento {
 	private TipoDocumento tipo;
 	
 	@Column(nullable = false)
-	private Date dataEmissao;
+	private String dataEmissao;
 	
 	@Column(unique = true, nullable = false)
 	private String numero;
