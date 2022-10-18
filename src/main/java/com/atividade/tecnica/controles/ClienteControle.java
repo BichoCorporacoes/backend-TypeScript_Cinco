@@ -1,11 +1,15 @@
 package com.atividade.tecnica.controles;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -35,6 +39,23 @@ public class ClienteControle {
 	public ResponseEntity<?> cadastroCliente(@RequestBody Cliente obj) {
 		clienteServico.insert(obj);
 		return new ResponseEntity<>("Cliente Cadastrado com sucesso!", HttpStatus.CREATED);
+	}
+	
+	@GetMapping("/clientes")
+	public ResponseEntity<?> pegarTitulares(){
+		List<Cliente> cliente = clienteServico.findAll();
+		Set<Cliente> clientes = new HashSet<>();
+		if(clienteServico.findAll().isEmpty()) {
+			return new ResponseEntity<>("Ainda não temos nenhum cliente cadastrado. por favor cadastre algum...", HttpStatus.BAD_GATEWAY);
+		}else {
+			for (Cliente titulares : cliente) {
+				if(titulares.isTitular()) {
+					clientes.add(titulares);
+				}
+			}
+			return new ResponseEntity<>(clientes, HttpStatus.OK);
+		}
+
 	}
 
 	@PutMapping("/cadastro/{clienteID}/telefone")
@@ -80,7 +101,8 @@ public class ClienteControle {
 	}
 
 	@PutMapping("/cadastro/{clienteID}/quarto")
-	public ResponseEntity<?> cadastroClienteAcomodacao(@PathVariable Long clienteID, @RequestBody Acomodacao acomodacao) {
+	public ResponseEntity<?> cadastroClienteAcomodacao(@PathVariable Long clienteID,
+			@RequestBody Acomodacao acomodacao) {
 		List<Cliente> clientes = clienteServico.findAll();
 		Cliente cliente = clienteServico.selecionar(clientes, clienteID);
 		if (cliente != null) {
@@ -103,6 +125,39 @@ public class ClienteControle {
 		} else {
 			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
 		}
+	}
+
+	@DeleteMapping("/delete/{clienteId}")
+	public ResponseEntity<?> deleteCliente(@PathVariable Long clienteId) { 
+		List<Cliente> clientes = clienteServico.findAll();                 
+		Cliente cliente = clienteServico.selecionar(clientes, clienteId);
+		if (cliente != null) {
+			clienteServico.deletarCliente(clienteId);
+			return new ResponseEntity<>("Cliente Deletado com sucesso", HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@DeleteMapping("/delete/dependente/{clienteId}")
+	public ResponseEntity<?> deleteClienteDependente(@PathVariable Long clienteId, @RequestBody Cliente dependente) {
+		List<Cliente> clientes = clienteServico.findAll();
+		Cliente cliente = clienteServico.selecionar(clientes, clienteId);
+		if (cliente != null) {
+			for (Cliente titulares : cliente.getDependente()) {
+				if(dependente.getID() == titulares.getID()) {
+					cliente.getDependente().remove(titulares);
+					clienteServico.insert(cliente);
+					clienteServico.deletarCliente(titulares.getID());
+				}else {
+					return new ResponseEntity<>("Dependente não encontrado", HttpStatus.BAD_REQUEST);
+				}
+			}
+			return new ResponseEntity<>("Cliente Deletado com sucesso", HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
+		}
+
 	}
 
 }

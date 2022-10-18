@@ -1,5 +1,6 @@
 package com.atividade.tecnica.servico;
 
+
 import java.util.List;
 import java.util.Optional;
 
@@ -93,4 +94,10 @@ public class ClienteServico {
 		}
 		return selecionado;
 	}
+	
+	public void deletarCliente(Long id) {
+		repositorioCliente.deleteById(id);
+	}
+	
+
 }

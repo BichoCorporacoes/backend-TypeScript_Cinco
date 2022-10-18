@@ -38,7 +38,7 @@ public class Cliente{
 	@OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Set<Telefone> Telefones = new HashSet<>();;
 	
-	@OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
 	private Set<Cliente> Dependente = new HashSet<>();;
 	
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
