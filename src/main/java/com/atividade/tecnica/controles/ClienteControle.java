@@ -136,6 +136,13 @@ public class ClienteControle {
 		}
 	}
 	
+	@PutMapping("/atualizar-endereco/{id}")
+	public ResponseEntity<?> atualizarEndereco(@PathVariable Long id, @RequestBody Endereco atualizacao ){
+		atualizacao.setID(id);
+		atualizacao = clienteServico.updateEnd(atualizacao);
+		return new ResponseEntity<>("Endereço atulaizado com sucesso", HttpStatus.CREATED);
+	}
+	
 	// Telefone
 	@PutMapping("/cadastro-telefone/{clienteID}")
 	public ResponseEntity<?> cadastroClienteTelefone(@PathVariable Long clienteID, @RequestBody Telefone telefone) {

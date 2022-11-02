@@ -161,6 +161,25 @@ public class ClienteServico {
 		repositorioEndereco.save(endereco);		
 	}
 	
+	public Endereco updateEnd(Endereco documento) {
+		Endereco newOBJ = getEndById(documento.getID());
+		UpdateEnd(newOBJ, documento);
+		return repositorioEndereco.save(newOBJ);
+	}
+	public Endereco getEndById(Long obj) {
+		Optional<Endereco> find =  repositorioEndereco.findById(obj);
+		return find.orElseThrow(() -> new ObjectNotFoundException("Documento não encontrado"));
+	}
+	public void UpdateEnd(Endereco newObj, Endereco obj) {
+		newObj.setBairro(obj.getBairro());
+		newObj.setCep(obj.getCep());
+		newObj.setCidade(obj.getCidade());
+		newObj.setPais(obj.getPais());
+		newObj.setRua(obj.getRua());
+		newObj.setNumero(obj.getNumero());
+	}
+	
+	
 	// Acomodacao
 	public void insertAcomodacaoCliente(Long id, Cliente cliente){
 		Optional<Acomodacao> find = repositorioAcomodacao.findById(id);
