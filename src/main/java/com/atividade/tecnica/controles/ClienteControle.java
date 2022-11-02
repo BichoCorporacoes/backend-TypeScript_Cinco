@@ -145,7 +145,7 @@ public class ClienteControle {
 	
 	// Telefone
 	@PutMapping("/cadastro-telefone/{clienteID}")
-	public ResponseEntity<?> cadastroClienteTelefone(@PathVariable Long clienteID, @RequestBody Telefone telefone) {
+	public ResponseEntity<?> cadastroClienteTelefone(@PathVariable Long clienteID, @RequestBody List<Telefone> telefone) {
 		List<Cliente> clientes = clienteServico.findAll();
 		Cliente cliente = clienteServico.selecionar(clientes, clienteID);
 		if (cliente != null) {
@@ -177,14 +177,16 @@ public class ClienteControle {
 	
 	// Documento
 	@PutMapping("/cadastro-documento/{clienteID}")
-	public ResponseEntity<?> cadastroClienteDocumento(@PathVariable Long clienteID, @RequestBody Documento documento) {
+	public ResponseEntity<?> cadastroClienteDocumento(@PathVariable Long clienteID, @RequestBody List<Documento> documento) {
 		List<Cliente> clientes = clienteServico.findAll();
 		Cliente cliente = clienteServico.selecionar(clientes, clienteID);
 		List<Documento> docs = documentoServico.findDocs();
 		if (cliente != null) {
 			for (Documento findDocs : docs) {
-				if (documento.getNumero().equals(findDocs.getNumero())) {
-					return new ResponseEntity<>("Documento Já existe", HttpStatus.CONFLICT);
+				for (Documento i : documento) {
+					if (i.getNumero().equals(findDocs.getNumero())) {
+						return new ResponseEntity<>("Documento Já existe", HttpStatus.CONFLICT);
+					}
 				}
 			}
 			clienteServico.insertDocumentoCliente(cliente, documento);

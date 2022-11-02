@@ -100,10 +100,10 @@ public class ClienteServico {
 		return obj;
 
 	}
-	public void insertDocumentoCliente(Cliente cliente, Documento documento) {
+	public void insertDocumentoCliente(Cliente cliente, List<Documento> documento) {
 		findId(cliente.getID());
-		cliente.getDocumentos().add(documento);
-		repositorioDocumento.save(documento);
+		cliente.getDocumentos().addAll(documento);
+		repositorioDocumento.saveAll(documento);
 	}
 	public Documento updateDocs(Documento documento) {
 		Documento newOBJ = getDocById(documento.getID());
@@ -122,10 +122,10 @@ public class ClienteServico {
 	
 	
 	// Telefone
-	public void insertTelefoneCliente(Cliente cliente, Telefone telefone) {
+	public void insertTelefoneCliente(Cliente cliente, List<Telefone> telefone) {
 		findId(cliente.getID());
-		cliente.getTelefones().add(telefone);
-		repositorioTelefone.save(telefone);
+		cliente.getTelefones().addAll(telefone);
+		repositorioTelefone.saveAll(telefone);
 	}
 	public Telefone getTellById(Long obj) {
 		Optional<Telefone> find =  repositorioTelefone.findById(obj);
