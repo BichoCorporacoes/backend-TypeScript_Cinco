@@ -1,6 +1,8 @@
 package com.atividade.tecnica.entidades;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -33,13 +35,13 @@ public class Cliente{
 	private boolean Titular;
 	
 	@OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	private Set<Documento> Documentos = new HashSet<>();
+	private List<Documento> Documentos = new ArrayList<>();
 	
 	@OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	private Set<Telefone> Telefones = new HashSet<>();;
+	private Set<Telefone> Telefones = new HashSet<>();
 	
 	@OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
-	private Set<Cliente> Dependente = new HashSet<>();;
+	private Set<Cliente> Dependente = new HashSet<>();
 	
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	private Acomodacao Acomodacao;

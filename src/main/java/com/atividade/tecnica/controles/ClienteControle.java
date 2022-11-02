@@ -1,5 +1,6 @@
 package com.atividade.tecnica.controles;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -120,6 +121,7 @@ public class ClienteControle {
 		if (cliente != null) {
 			clienteServico.depedenteCadastro(dependente);
 			clienteServico.insertEnderecoCliente(dependente, cliente.getEndereco());
+			clienteServico.insertAcomodacaoCliente(cliente.getAcomodacao().getID(), dependente);
 			clienteServico.insertDependente(cliente, dependente);
 			return new ResponseEntity<>("Dependente Cadastro com Sucesso!", HttpStatus.CREATED);
 		} else {
@@ -157,7 +159,41 @@ public class ClienteControle {
 		} else {
 			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
 		}
-
 	}
 
+	@PutMapping("/atualizar/Documento/{id}")
+	public ResponseEntity<?> atualizarDocumento(@PathVariable Long id, @RequestBody Documento atualizacao ){
+		atualizacao.setID(id);
+		atualizacao = clienteServico.updateDocs(atualizacao);
+		return new ResponseEntity<>("Documento atulaizado com sucesso", HttpStatus.CREATED);
+	}
+	@DeleteMapping("/cliente/{id}/Documento/deletar")
+	public ResponseEntity<?> deletarDocumento(@PathVariable Long id, @RequestBody Cliente docs){
+		Cliente cliente = clienteServico.findId(id);
+		List<Long> ids = new ArrayList<>();
+		for(Documento doc : docs.getDocumentos())
+			ids.add(doc.getID());
+		System.out.println(ids);
+		List<Documento> documentos = clienteServico.fromListIds(ids);
+		cliente.getDocumentos().removeAll(documentos);
+		clienteServico.insert(cliente);
+		return new ResponseEntity<>("Documento removidos do pacote com sucesso", HttpStatus.ACCEPTED);	
+	}
+	@PutMapping("/atualizar/{id}")
+	public ResponseEntity<?> atualizarDependetes(@PathVariable Long id ,@RequestBody Cliente dependente){
+		Cliente titular = clienteServico.findId(id);
+		Set<Cliente> dependentesFind = titular.getDependente();
+		if(titular.isTitular()) {
+			for (Cliente cliente : dependentesFind) {
+				if(cliente.getID() == dependente.getID()) {
+					clienteServico.atualizarDepedentes(dependente);
+				}else {
+					return new ResponseEntity<>("Dependente não encontrado", HttpStatus.NOT_FOUND);
+				}
+			}
+			return new ResponseEntity<>("Dependente Atualizado", HttpStatus.OK);
+		}else {
+			return new ResponseEntity<>("Titular não encontrado", HttpStatus.NOT_FOUND);
+		}	
+	}
 }
