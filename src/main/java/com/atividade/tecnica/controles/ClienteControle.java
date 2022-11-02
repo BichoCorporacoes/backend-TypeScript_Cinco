@@ -149,7 +149,9 @@ public class ClienteControle {
 		List<Cliente> clientes = clienteServico.findAll();
 		Cliente cliente = clienteServico.selecionar(clientes, clienteID);
 		if (cliente != null) {
-			clienteServico.insertTelefoneCliente(cliente, telefone);
+			for (Telefone telefones : telefone) {
+				clienteServico.insertTelefoneCliente(cliente, telefone);
+			}
 			return new ResponseEntity<>("Telefone Cadastro com Sucesso!", HttpStatus.CREATED);
 		} else {
 			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
