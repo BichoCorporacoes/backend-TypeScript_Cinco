@@ -36,13 +36,27 @@ public class ClienteControle {
 	@Autowired
 	private DocumentoServico documentoServico;
 
+	
+	// Cliente
 	@PostMapping("/cadastro")
 	public ResponseEntity<?> cadastroCliente(@RequestBody Cliente obj) {
 		clienteServico.insert(obj);
 		return new ResponseEntity<>("Cliente Cadastrado com sucesso!", HttpStatus.CREATED);
 	}
 	
-	@GetMapping("/clientes")
+	@DeleteMapping("/excluir/{clienteId}")
+	public ResponseEntity<?> deleteCliente(@PathVariable Long clienteId) { 
+		List<Cliente> clientes = clienteServico.findAll();                 
+		Cliente cliente = clienteServico.selecionar(clientes, clienteId);
+		if (cliente != null) {
+			clienteServico.deletarCliente(clienteId);
+			return new ResponseEntity<>("Cliente Deletado com sucesso", HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@GetMapping("/clientes-titulares")
 	public ResponseEntity<?> pegarTitulares(){
 		List<Cliente> cliente = clienteServico.findAll();
 		Set<Cliente> clientes = new HashSet<>();
@@ -58,63 +72,8 @@ public class ClienteControle {
 		}
 
 	}
-
-	@PutMapping("/cadastro/{clienteID}/telefone")
-	public ResponseEntity<?> cadastroClienteTelefone(@PathVariable Long clienteID, @RequestBody Telefone telefone) {
-		List<Cliente> clientes = clienteServico.findAll();
-		Cliente cliente = clienteServico.selecionar(clientes, clienteID);
-		if (cliente != null) {
-			clienteServico.insertTelefoneCliente(cliente, telefone);
-			return new ResponseEntity<>("Telefone Cadastro com Sucesso!", HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	@PutMapping("/cadastro/{clienteID}/documento")
-	public ResponseEntity<?> cadastroClienteDocumento(@PathVariable Long clienteID, @RequestBody Documento documento) {
-		List<Cliente> clientes = clienteServico.findAll();
-		Cliente cliente = clienteServico.selecionar(clientes, clienteID);
-		List<Documento> docs = documentoServico.findDocs();
-		if (cliente != null) {
-			for (Documento findDocs : docs) {
-				if (documento.getNumero().equals(findDocs.getNumero())) {
-					return new ResponseEntity<>("Documento Já existe", HttpStatus.CONFLICT);
-				}
-			}
-			clienteServico.insertDocumentoCliente(cliente, documento);
-			return new ResponseEntity<>("Documento cadastrado com sucesso!", HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	@PutMapping("/cadastro/{clienteID}/endereco")
-	public ResponseEntity<?> cadastroClienteEndereco(@PathVariable Long clienteID, @RequestBody Endereco endereco) {
-		List<Cliente> clientes = clienteServico.findAll();
-		Cliente cliente = clienteServico.selecionar(clientes, clienteID);
-		if (cliente != null) {
-			clienteServico.insertEnderecoCliente(cliente, endereco);
-			return new ResponseEntity<>("Endereço Cadastro com Sucesso!", HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	@PutMapping("/cadastro/{clienteID}/quarto")
-	public ResponseEntity<?> cadastroClienteAcomodacao(@PathVariable Long clienteID,
-			@RequestBody Acomodacao acomodacao) {
-		List<Cliente> clientes = clienteServico.findAll();
-		Cliente cliente = clienteServico.selecionar(clientes, clienteID);
-		if (cliente != null) {
-			clienteServico.insertAcomodacaoCliente(acomodacao.getID(), cliente);
-			return new ResponseEntity<>("Reserva feita com Sucesso!", HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	@PutMapping("/cadastro/{clienteID}/dependente")
+	// Dependente
+	@PutMapping("/cadastro-dependente/{clienteID}")
 	public ResponseEntity<?> cadastroClienteDependente(@PathVariable Long clienteID, @RequestBody Cliente dependente) {
 		List<Cliente> clientes = clienteServico.findAll();
 		Cliente cliente = clienteServico.selecionar(clientes, clienteID);
@@ -128,20 +87,8 @@ public class ClienteControle {
 			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
 		}
 	}
-
-	@DeleteMapping("/delete/{clienteId}")
-	public ResponseEntity<?> deleteCliente(@PathVariable Long clienteId) { 
-		List<Cliente> clientes = clienteServico.findAll();                 
-		Cliente cliente = clienteServico.selecionar(clientes, clienteId);
-		if (cliente != null) {
-			clienteServico.deletarCliente(clienteId);
-			return new ResponseEntity<>("Cliente Deletado com sucesso", HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	@DeleteMapping("/delete/dependente/{clienteId}")
+	
+	@DeleteMapping("/excluir-dependente/{clienteId}")
 	public ResponseEntity<?> deleteClienteDependente(@PathVariable Long clienteId, @RequestBody Cliente dependente) {
 		List<Cliente> clientes = clienteServico.findAll();
 		Cliente cliente = clienteServico.selecionar(clientes, clienteId);
@@ -161,39 +108,102 @@ public class ClienteControle {
 		}
 	}
 
-	@PutMapping("/atualizar/Documento/{id}")
+	
+	// Acomodação
+	@PutMapping("/cadastro-acomodacao/{clienteID}")
+	public ResponseEntity<?> cadastroClienteAcomodacao(@PathVariable Long clienteID,
+			@RequestBody Acomodacao acomodacao) {
+		List<Cliente> clientes = clienteServico.findAll();
+		Cliente cliente = clienteServico.selecionar(clientes, clienteID);
+		if (cliente != null) {
+			clienteServico.insertAcomodacaoCliente(acomodacao.getID(), cliente);
+			return new ResponseEntity<>("Reserva feita com Sucesso!", HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	// Endereco
+	@PutMapping("/cadastro-endereco/{clienteID}")
+	public ResponseEntity<?> cadastroClienteEndereco(@PathVariable Long clienteID, @RequestBody Endereco endereco) {
+		List<Cliente> clientes = clienteServico.findAll();
+		Cliente cliente = clienteServico.selecionar(clientes, clienteID);
+		if (cliente != null) {
+			clienteServico.insertEnderecoCliente(cliente, endereco);
+			return new ResponseEntity<>("Endereço Cadastro com Sucesso!", HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	// Telefone
+	@PutMapping("/cadastro-telefone/{clienteID}")
+	public ResponseEntity<?> cadastroClienteTelefone(@PathVariable Long clienteID, @RequestBody Telefone telefone) {
+		List<Cliente> clientes = clienteServico.findAll();
+		Cliente cliente = clienteServico.selecionar(clientes, clienteID);
+		if (cliente != null) {
+			clienteServico.insertTelefoneCliente(cliente, telefone);
+			return new ResponseEntity<>("Telefone Cadastro com Sucesso!", HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
+		}
+	}
+	@PutMapping("/atualizar-telefone/{id}")
+	public ResponseEntity<?> atualizarDocumento(@PathVariable Long id, @RequestBody Telefone atualizacao ){
+		atualizacao.setID(id);
+		atualizacao = clienteServico.updateTell(atualizacao);
+		return new ResponseEntity<>("Telefone atulaizado com sucesso", HttpStatus.CREATED);
+	}
+	
+	@DeleteMapping("/cliente-telefone/deletar/{id}")
+	public ResponseEntity<?> deletarTelefone(@PathVariable Long id, @RequestBody Cliente tell){
+		Cliente cliente = clienteServico.findId(id);
+		List<Long> ids = new ArrayList<>();
+		for(Telefone tells : tell.getTelefones())
+			ids.add(tells.getID());
+		System.out.println(ids);
+		List<Telefone> telefones = clienteServico.fromListIdsTelefones(ids);
+		cliente.getTelefones().removeAll(telefones);
+		clienteServico.insert(cliente);
+		return new ResponseEntity<>("Telefone removido com sucesso", HttpStatus.ACCEPTED);	
+	}
+	
+	// Documento
+	@PutMapping("/cadastro-documento/{clienteID}")
+	public ResponseEntity<?> cadastroClienteDocumento(@PathVariable Long clienteID, @RequestBody Documento documento) {
+		List<Cliente> clientes = clienteServico.findAll();
+		Cliente cliente = clienteServico.selecionar(clientes, clienteID);
+		List<Documento> docs = documentoServico.findDocs();
+		if (cliente != null) {
+			for (Documento findDocs : docs) {
+				if (documento.getNumero().equals(findDocs.getNumero())) {
+					return new ResponseEntity<>("Documento Já existe", HttpStatus.CONFLICT);
+				}
+			}
+			clienteServico.insertDocumentoCliente(cliente, documento);
+			return new ResponseEntity<>("Documento cadastrado com sucesso!", HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@PutMapping("/atualizar-documento/{id}")
 	public ResponseEntity<?> atualizarDocumento(@PathVariable Long id, @RequestBody Documento atualizacao ){
 		atualizacao.setID(id);
 		atualizacao = clienteServico.updateDocs(atualizacao);
 		return new ResponseEntity<>("Documento atulaizado com sucesso", HttpStatus.CREATED);
 	}
-	@DeleteMapping("/cliente/{id}/Documento/deletar")
+	
+	@DeleteMapping("/cliente-documento/deletar/{id}")
 	public ResponseEntity<?> deletarDocumento(@PathVariable Long id, @RequestBody Cliente docs){
 		Cliente cliente = clienteServico.findId(id);
 		List<Long> ids = new ArrayList<>();
 		for(Documento doc : docs.getDocumentos())
 			ids.add(doc.getID());
 		System.out.println(ids);
-		List<Documento> documentos = clienteServico.fromListIds(ids);
+		List<Documento> documentos = clienteServico.fromListIdsDocumentos(ids);
 		cliente.getDocumentos().removeAll(documentos);
 		clienteServico.insert(cliente);
 		return new ResponseEntity<>("Documento removidos do pacote com sucesso", HttpStatus.ACCEPTED);	
-	}
-	@PutMapping("/atualizar/{id}")
-	public ResponseEntity<?> atualizarDependetes(@PathVariable Long id ,@RequestBody Cliente dependente){
-		Cliente titular = clienteServico.findId(id);
-		Set<Cliente> dependentesFind = titular.getDependente();
-		if(titular.isTitular()) {
-			for (Cliente cliente : dependentesFind) {
-				if(cliente.getID() == dependente.getID()) {
-					clienteServico.atualizarDepedentes(dependente);
-				}else {
-					return new ResponseEntity<>("Dependente não encontrado", HttpStatus.NOT_FOUND);
-				}
-			}
-			return new ResponseEntity<>("Dependente Atualizado", HttpStatus.OK);
-		}else {
-			return new ResponseEntity<>("Titular não encontrado", HttpStatus.NOT_FOUND);
-		}	
 	}
 }

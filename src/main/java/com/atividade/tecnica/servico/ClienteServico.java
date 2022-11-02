@@ -92,7 +92,7 @@ public class ClienteServico {
 		Optional<Documento> find =  repositorioDocumento.findById(obj);
 		return find.orElseThrow(() -> new ObjectNotFoundException("Documento não encontrado"));
 	}
-	public List<Documento> fromListIds(List<Long> listId){
+	public List<Documento> fromListIdsDocumentos(List<Long> listId){
 		List<Documento> obj = new ArrayList<>();
 		for (Long longs : listId)
 			obj.add(getDocById(longs));
@@ -126,6 +126,31 @@ public class ClienteServico {
 		findId(cliente.getID());
 		cliente.getTelefones().add(telefone);
 		repositorioTelefone.save(telefone);
+	}
+	public Telefone getTellById(Long obj) {
+		Optional<Telefone> find =  repositorioTelefone.findById(obj);
+		return find.orElseThrow(() -> new ObjectNotFoundException("Documento não encontrado"));
+	}
+	public Telefone updateTell(Telefone documento) {
+		Telefone newOBJ = getTellById(documento.getID());
+		UpdateTell(newOBJ, documento);
+		return repositorioTelefone.save(newOBJ);
+	}
+	public void UpdateTell(Telefone newObj, Telefone obj) {
+		newObj.setDdd(obj.getDdd());
+		newObj.setNumero(obj.getNumero());
+	}
+	public void deleteTell(Long id) {
+		getDocById(id);
+		repositorioTelefone.deleteById(id);
+	}
+	public List<Telefone> fromListIdsTelefones(List<Long> listId){
+		List<Telefone> obj = new ArrayList<>();
+		for (Long longs : listId)
+			obj.add(getTellById(longs));
+		
+		return obj;
+
 	}
 	
 	
