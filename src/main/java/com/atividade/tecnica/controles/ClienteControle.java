@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.atividade.tecnica.dto.ClienteRegisterDto;
 import com.atividade.tecnica.entidades.Acomodacao;
 import com.atividade.tecnica.entidades.Cliente;
 import com.atividade.tecnica.entidades.Documento;
@@ -56,6 +57,13 @@ public class ClienteControle {
 		}
 	}
 	
+	@PostMapping("/cadastrar-funcionario")
+	public ResponseEntity<?> cadastrarCliente(@RequestBody ClienteRegisterDto usuarioDto) {
+		Cliente usuario = usuarioDto.get();
+		clienteServico.insert(usuario);
+		return new ResponseEntity<>("User Criado", HttpStatus.ACCEPTED);
+	}
+	
 	@GetMapping("/clientes-titulares")
 	public ResponseEntity<?> pegarTitulares(){
 		List<Cliente> cliente = clienteServico.findAll();
@@ -70,7 +78,6 @@ public class ClienteControle {
 			}
 			return new ResponseEntity<>(clientes, HttpStatus.OK);
 		}
-
 	}
 	// Dependente
 	@PutMapping("/cadastro-dependente/{clienteID}")
@@ -149,7 +156,7 @@ public class ClienteControle {
 		List<Cliente> clientes = clienteServico.findAll();
 		Cliente cliente = clienteServico.selecionar(clientes, clienteID);
 		if (cliente != null) {
-			for (Telefone telefones : telefone) {
+			for (@SuppressWarnings("unused") Telefone telefones : telefone) {
 				clienteServico.insertTelefoneCliente(cliente, telefone);
 			}
 			return new ResponseEntity<>("Telefone Cadastro com Sucesso!", HttpStatus.CREATED);
