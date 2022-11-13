@@ -1,20 +1,32 @@
 package com.atividade.tecnica;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.atividade.tecnica.entidades.Acomodacao;
+import com.atividade.tecnica.entidades.Cliente;
+import com.atividade.tecnica.entidades.Credenciais;
+import com.atividade.tecnica.enumeracao.Roles;
 import com.atividade.tecnica.enumeracao.TipoAcomodacao;
 import com.atividade.tecnica.repositorios.RepositorioAcomodacao;
+import com.atividade.tecnica.repositorios.RepositorioCliente;
 
 @SpringBootApplication
 public class TecnicaApplication implements CommandLineRunner{
 
 	@Autowired
 	private RepositorioAcomodacao repositorioAcomodacao;
+	@Autowired
+	private RepositorioCliente cliente;
 	
+	private final BCryptPasswordEncoder encriptar = new BCryptPasswordEncoder();
+
 	public static void main(String[] args) {
 		SpringApplication.run(TecnicaApplication.class, args);
 	}
@@ -75,6 +87,21 @@ public class TecnicaApplication implements CommandLineRunner{
 		acomodacaoSolteiroMais.setClimatizacao(true);
 		acomodacaoSolteiroMais.setGaragem(1);		
 		repositorioAcomodacao.save(acomodacaoSolteiroMais);
+		
+
+		Cliente admin = new Cliente();
+		Credenciais inf = new Credenciais();
+		String senha = "admin";
+		List<Roles> roleArray = new ArrayList<>();
+		roleArray.add(Roles.ROLE_ADMIN);
+		inf.setEmail("Admin@bicho.com");
+		inf.setPassword(encriptar.encode(senha));
+		admin.setCredenciais(inf);
+		admin.setNivel_de_acesso(roleArray);
+		admin.setNome("Admin");
+		admin.setNomeSocial("Admin");	
+		cliente.save(admin);
+		
 		
 	}
 }
