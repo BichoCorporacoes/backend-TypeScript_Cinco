@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -14,6 +15,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+
+import com.atividade.tecnica.enumeracao.Roles;
 
 import lombok.Data;
 
@@ -30,6 +33,12 @@ public class Cliente{
 	
 	@Column
 	private String nomeSocial;
+	
+	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+	private Credenciais credenciais;
+	
+	@ElementCollection(fetch = FetchType.EAGER)
+	private List<Roles> nivel_de_acesso  = new ArrayList<>();;
 	
 	@Column
 	private boolean Titular;
