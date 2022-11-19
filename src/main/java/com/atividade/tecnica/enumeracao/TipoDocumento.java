@@ -1,5 +1,6 @@
 package com.atividade.tecnica.enumeracao;
 
 public enum TipoDocumento {
-	CPF, Passaporte, RG
+	CPF, PASSAPORTE, RG
 }
+

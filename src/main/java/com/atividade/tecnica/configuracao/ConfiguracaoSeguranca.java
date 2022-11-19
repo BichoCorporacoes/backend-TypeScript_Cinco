@@ -39,7 +39,7 @@ public class ConfiguracaoSeguranca extends WebSecurityConfigurerAdapter{
 	protected void configure(HttpSecurity http) throws Exception {
 	
 		http.cors().and().csrf().disable();
-
+		
 		http.authorizeHttpRequests().antMatchers(rotasPublicas).permitAll().anyRequest().authenticated();
 		
 		http.addFilter(new JwtFiltroAutenticador(authenticationManager(), jwtTokenGerador));

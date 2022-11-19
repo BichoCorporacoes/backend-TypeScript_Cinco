@@ -88,7 +88,6 @@ public class TecnicaApplication implements CommandLineRunner{
 		acomodacaoSolteiroMais.setGaragem(1);		
 		repositorioAcomodacao.save(acomodacaoSolteiroMais);
 		
-
 		Cliente admin = new Cliente();
 		Credenciais inf = new Credenciais();
 		String senha = "admin";
@@ -99,7 +98,8 @@ public class TecnicaApplication implements CommandLineRunner{
 		admin.setCredenciais(inf);
 		admin.setNivel_de_acesso(roleArray);
 		admin.setNome("Admin");
-		admin.setNomeSocial("Admin");	
+		admin.setNomeSocial("Admin");
+		admin.setTitular(true);
 		cliente.save(admin);
 		
 		

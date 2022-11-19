@@ -17,6 +17,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 import com.atividade.tecnica.enumeracao.Roles;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Data;
 
@@ -49,14 +50,15 @@ public class Cliente{
 	@OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Set<Telefone> Telefones = new HashSet<>();
 	
+	@JsonIgnoreProperties(value = {"dependente" , "acomodacao", "endereco", "nivel_de_acesso"})
 	@OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
-	private Set<Cliente> Dependente = new HashSet<>();
+	private List<Cliente> Dependente = new ArrayList<>();
 	
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	private Acomodacao Acomodacao;
 	
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-	private Endereco Endereco;
+	private Endereco Endereco = null;
 	
 
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.atividade.tecnica.entidades.Acomodacao;
 import com.atividade.tecnica.entidades.Cliente;
+import com.atividade.tecnica.entidades.Credenciais;
 import com.atividade.tecnica.entidades.Documento;
 import com.atividade.tecnica.entidades.Endereco;
 import com.atividade.tecnica.entidades.Telefone;
@@ -39,6 +40,29 @@ public class ClienteServico {
 		repositorioCliente.save(cliente);
 	}
 	
+	public Cliente select(List<Cliente> usuarios, String email) {
+		Cliente selecionado = null;
+		for (Cliente usuario : usuarios) {
+			if (usuario.getCredenciais().getEmail().equals(email)) {
+				selecionado = usuario;
+			}
+		}
+		return selecionado;
+	}
+	
+	public Cliente vereficarDuplicatas(List<Cliente> objetos, String identificador) {
+		Cliente usuario = null;
+		for (Cliente objeto : objetos) {
+			Credenciais credencial = objeto.getCredenciais();
+			String email = credencial.getEmail();
+			if (email.trim().equals(identificador.trim())) {
+				usuario = objeto;
+				break;
+			}
+		}
+		return usuario;
+	}
+	
 	public Cliente selecionar(List<Cliente> clientes, Long id) {
 		Cliente selecionado = null;
 		for (Cliente cliente : clientes) {
@@ -55,7 +79,6 @@ public class ClienteServico {
 	
 	public List<Cliente> findAll() {
 		return repositorioCliente.findAll();
-
 	}
 	
 	public Cliente findId(Long id) {
@@ -90,6 +113,10 @@ public class ClienteServico {
 	// Documentos
 	public Documento getDocById(Long obj) {
 		Optional<Documento> find =  repositorioDocumento.findById(obj);
+		return find.orElseThrow(() -> new ObjectNotFoundException("Documento não encontrado"));
+	}
+	public Documento getDocByNumero(String obj) {
+		Optional<Documento> find =  repositorioDocumento.findByNumero(obj);
 		return find.orElseThrow(() -> new ObjectNotFoundException("Documento não encontrado"));
 	}
 	public List<Documento> fromListIdsDocumentos(List<Long> listId){
@@ -185,5 +212,8 @@ public class ClienteServico {
 		Optional<Acomodacao> find = repositorioAcomodacao.findById(id);
 		cliente.setAcomodacao(find.get());
 		repositorioCliente.save(cliente);
+	}
+	public List<Acomodacao> getAllAcomodacao(){
+		return repositorioAcomodacao.findAll();
 	}
 }

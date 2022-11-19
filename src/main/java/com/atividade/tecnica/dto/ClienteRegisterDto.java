@@ -16,6 +16,8 @@ public class ClienteRegisterDto implements DataTransferObject<Cliente> {
 	
 	private String email;
 	private String password;
+	private String nome;
+	private String nomeSocial;
 	private List<Roles> nivel_de_acesso;
 
 	@Override
@@ -26,6 +28,9 @@ public class ClienteRegisterDto implements DataTransferObject<Cliente> {
 		credencial.setEmail(email);
 		credencial.setPassword(encriptar.encode(password));
 		
+		usuario.setNome(nome);
+		usuario.setNomeSocial(nomeSocial);
+		usuario.setTitular(true);
 		usuario.setCredenciais(credencial);
 		usuario.setNivel_de_acesso(nivel_de_acesso);
 		return usuario;

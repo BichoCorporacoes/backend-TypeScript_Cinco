@@ -8,6 +8,9 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,13 +22,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.atividade.tecnica.dto.ClienteRegisterDto;
+import com.atividade.tecnica.dto.TokenDto;
 import com.atividade.tecnica.entidades.Acomodacao;
 import com.atividade.tecnica.entidades.Cliente;
-import com.atividade.tecnica.entidades.Documento;
 import com.atividade.tecnica.entidades.Endereco;
-import com.atividade.tecnica.entidades.Telefone;
+import com.atividade.tecnica.jwt.JsonWebTotenGerador;
 import com.atividade.tecnica.servico.ClienteServico;
-import com.atividade.tecnica.servico.DocumentoServico;
+import com.atividade.tecnica.servico.LoginService;
+
 
 @CrossOrigin
 @RestController
@@ -35,14 +39,19 @@ public class ClienteControle {
 	@Autowired
 	private ClienteServico clienteServico;
 	@Autowired
-	private DocumentoServico documentoServico;
+	private AuthenticationManager authManager;
+	@Autowired
+	private JsonWebTotenGerador jwtAuth;
+
+	
+	// Teste
 
 	
 	// Cliente
 	@PostMapping("/cadastro")
 	public ResponseEntity<?> cadastroCliente(@RequestBody Cliente obj) {
 		clienteServico.insert(obj);
-		return new ResponseEntity<>("Cliente Cadastrado com sucesso!", HttpStatus.CREATED);
+		return new ResponseEntity<>( obj.getID(), HttpStatus.CREATED);
 	}
 	
 	@DeleteMapping("/excluir/{clienteId}")
@@ -59,15 +68,26 @@ public class ClienteControle {
 	
 	@PostMapping("/cadastrar-funcionario")
 	public ResponseEntity<?> cadastrarCliente(@RequestBody ClienteRegisterDto usuarioDto) {
-		Cliente usuario = usuarioDto.get();
-		clienteServico.insert(usuario);
-		return new ResponseEntity<>("User Criado", HttpStatus.ACCEPTED);
+		List<Cliente> todos = clienteServico.findAll();
+		Cliente existe = clienteServico.vereficarDuplicatas(todos, usuarioDto.getEmail());
+		if(existe != null ) {
+			return new ResponseEntity<>("Funcionario com o email '" + usuarioDto.getEmail() + "' Já está cadastrado", HttpStatus.BAD_REQUEST);
+		}else {
+			Cliente usuario = usuarioDto.get();
+			clienteServico.insert(usuario);
+			return new ResponseEntity<>("User Criado", HttpStatus.ACCEPTED);
+		}
+	}
+	@GetMapping("/cliente-titular/{id}")
+	public ResponseEntity<?> GetTitularById(@PathVariable Long id){
+		Cliente cliente = clienteServico.findId(id);
+		return new ResponseEntity<>(cliente, HttpStatus.ACCEPTED);
 	}
 	
 	@GetMapping("/clientes-titulares")
 	public ResponseEntity<?> pegarTitulares(){
 		List<Cliente> cliente = clienteServico.findAll();
-		Set<Cliente> clientes = new HashSet<>();
+		List<Cliente> clientes = new ArrayList<>();
 		if(clienteServico.findAll().isEmpty()) {
 			return new ResponseEntity<>("Ainda não temos nenhum cliente cadastrado. por favor cadastre algum...", HttpStatus.BAD_GATEWAY);
 		}else {
@@ -79,16 +99,36 @@ public class ClienteControle {
 			return new ResponseEntity<>(clientes, HttpStatus.OK);
 		}
 	}
+	@PostMapping("/login")
+	public ResponseEntity<?> loginUser(@RequestBody LoginService login){
+		UsernamePasswordAuthenticationToken logging = login.convert();
+		List<Cliente> usuarios = clienteServico.findAll();
+		try {
+		      Authentication authentication = authManager.authenticate(logging);
+		      Cliente user = clienteServico.select(usuarios, authentication.getName());
+		      String token = jwtAuth.createToken(authentication.getName());
+				return new ResponseEntity<>(new TokenDto(token, "Bearer", user),HttpStatus.ACCEPTED);
+			}catch(Exception e) {
+				return new ResponseEntity<>("Usuario ou senha incorretos",HttpStatus.UNAUTHORIZED);
+			}
+	}
+	
 	// Dependente
 	@PutMapping("/cadastro-dependente/{clienteID}")
 	public ResponseEntity<?> cadastroClienteDependente(@PathVariable Long clienteID, @RequestBody Cliente dependente) {
 		List<Cliente> clientes = clienteServico.findAll();
 		Cliente cliente = clienteServico.selecionar(clientes, clienteID);
 		if (cliente != null) {
-			clienteServico.depedenteCadastro(dependente);
-			clienteServico.insertEnderecoCliente(dependente, cliente.getEndereco());
-			clienteServico.insertAcomodacaoCliente(cliente.getAcomodacao().getID(), dependente);
-			clienteServico.insertDependente(cliente, dependente);
+			if(cliente.getEndereco() == null) {
+				return new ResponseEntity<>("Cadastre o Endereço Primeiro", HttpStatus.CONFLICT);
+			}else if(cliente.getAcomodacao() == null) {
+				return new ResponseEntity<>("Cadastre a Acomodação Primeiro", HttpStatus.CONFLICT);
+			}else {
+				clienteServico.depedenteCadastro(dependente);
+				clienteServico.insertEnderecoCliente(dependente, cliente.getEndereco());
+				clienteServico.insertAcomodacaoCliente(cliente.getAcomodacao().getID(), dependente);
+				clienteServico.insertDependente(cliente, dependente);
+			}
 			return new ResponseEntity<>("Dependente Cadastro com Sucesso!", HttpStatus.CREATED);
 		} else {
 			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
@@ -130,6 +170,17 @@ public class ClienteControle {
 		}
 	}
 	
+	
+	@GetMapping("/acomodacoes")
+	public ResponseEntity<?> PegarAcomodacao() {
+		try{
+			return new ResponseEntity<>(clienteServico.getAllAcomodacao(), HttpStatus.OK);
+		}catch(Exception e) {			
+			return new ResponseEntity<>(e, HttpStatus.FORBIDDEN);
+		}
+
+	}
+	
 	// Endereco
 	@PutMapping("/cadastro-endereco/{clienteID}")
 	public ResponseEntity<?> cadastroClienteEndereco(@PathVariable Long clienteID, @RequestBody Endereco endereco) {
@@ -151,77 +202,8 @@ public class ClienteControle {
 	}
 	
 	// Telefone
-	@PutMapping("/cadastro-telefone/{clienteID}")
-	public ResponseEntity<?> cadastroClienteTelefone(@PathVariable Long clienteID, @RequestBody List<Telefone> telefone) {
-		List<Cliente> clientes = clienteServico.findAll();
-		Cliente cliente = clienteServico.selecionar(clientes, clienteID);
-		if (cliente != null) {
-			for (@SuppressWarnings("unused") Telefone telefones : telefone) {
-				clienteServico.insertTelefoneCliente(cliente, telefone);
-			}
-			return new ResponseEntity<>("Telefone Cadastro com Sucesso!", HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
-		}
-	}
-	@PutMapping("/atualizar-telefone/{id}")
-	public ResponseEntity<?> atualizarDocumento(@PathVariable Long id, @RequestBody Telefone atualizacao ){
-		atualizacao.setID(id);
-		atualizacao = clienteServico.updateTell(atualizacao);
-		return new ResponseEntity<>("Telefone atulaizado com sucesso", HttpStatus.CREATED);
-	}
 	
-	@DeleteMapping("/cliente-telefone/deletar/{id}")
-	public ResponseEntity<?> deletarTelefone(@PathVariable Long id, @RequestBody Cliente tell){
-		Cliente cliente = clienteServico.findId(id);
-		List<Long> ids = new ArrayList<>();
-		for(Telefone tells : tell.getTelefones())
-			ids.add(tells.getID());
-		System.out.println(ids);
-		List<Telefone> telefones = clienteServico.fromListIdsTelefones(ids);
-		cliente.getTelefones().removeAll(telefones);
-		clienteServico.insert(cliente);
-		return new ResponseEntity<>("Telefone removido com sucesso", HttpStatus.ACCEPTED);	
-	}
 	
 	// Documento
-	@PutMapping("/cadastro-documento/{clienteID}")
-	public ResponseEntity<?> cadastroClienteDocumento(@PathVariable Long clienteID, @RequestBody List<Documento> documento) {
-		List<Cliente> clientes = clienteServico.findAll();
-		Cliente cliente = clienteServico.selecionar(clientes, clienteID);
-		List<Documento> docs = documentoServico.findDocs();
-		if (cliente != null) {
-			for (Documento findDocs : docs) {
-				for (Documento i : documento) {
-					if (i.getNumero().equals(findDocs.getNumero())) {
-						return new ResponseEntity<>("Documento Já existe", HttpStatus.CONFLICT);
-					}
-				}
-			}
-			clienteServico.insertDocumentoCliente(cliente, documento);
-			return new ResponseEntity<>("Documento cadastrado com sucesso!", HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>("Cliente não encontrado", HttpStatus.BAD_REQUEST);
-		}
-	}
 	
-	@PutMapping("/atualizar-documento/{id}")
-	public ResponseEntity<?> atualizarDocumento(@PathVariable Long id, @RequestBody Documento atualizacao ){
-		atualizacao.setID(id);
-		atualizacao = clienteServico.updateDocs(atualizacao);
-		return new ResponseEntity<>("Documento atulaizado com sucesso", HttpStatus.CREATED);
-	}
-	
-	@DeleteMapping("/cliente-documento/deletar/{id}")
-	public ResponseEntity<?> deletarDocumento(@PathVariable Long id, @RequestBody Cliente docs){
-		Cliente cliente = clienteServico.findId(id);
-		List<Long> ids = new ArrayList<>();
-		for(Documento doc : docs.getDocumentos())
-			ids.add(doc.getID());
-		System.out.println(ids);
-		List<Documento> documentos = clienteServico.fromListIdsDocumentos(ids);
-		cliente.getDocumentos().removeAll(documentos);
-		clienteServico.insert(cliente);
-		return new ResponseEntity<>("Documento removidos do pacote com sucesso", HttpStatus.ACCEPTED);	
-	}
 }
