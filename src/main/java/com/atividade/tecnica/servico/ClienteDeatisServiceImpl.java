@@ -24,7 +24,7 @@ public class ClienteDeatisServiceImpl implements UserDetailsService{
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		List<Cliente> usuarios = repositorio.findAll();
-		Cliente usuario = selecionador.select(usuarios, username);
+		Cliente usuario = selecionador.selecionar(usuarios, username);
 		if (usuario == null) {
 			throw new UsernameNotFoundException(username);
 		}

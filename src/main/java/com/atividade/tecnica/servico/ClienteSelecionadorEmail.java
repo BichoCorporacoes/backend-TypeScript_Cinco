@@ -3,19 +3,25 @@ package com.atividade.tecnica.servico;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.atividade.tecnica.entidades.Cliente;
+import com.atividade.tecnica.entidades.Credenciais;
 
-@Component
-public class ClienteSelecionadorEmail {
+@Service
+public class ClienteSelecionadorEmail implements Selecionador<Cliente, String>{
 	
-	public Cliente select(List<Cliente> usuarios, String email) {
-		Cliente selecionado = null;
-		for (Cliente usuario : usuarios) {
-			if (usuario.getCredenciais().getEmail().equals(email)) {
-				selecionado = usuario;
+	@Override
+	public Cliente selecionar(List<Cliente> objetos, String identificador) {
+		Cliente usuario = null;
+		for (Cliente objeto : objetos) {
+			Credenciais credencial = objeto.getCredenciais();
+			String nomeUsuario = credencial.getEmail();
+			if (nomeUsuario.trim().equals(identificador.trim())) {
+				usuario = objeto;
+				break;
 			}
 		}
-		return selecionado;
+		return usuario;
 	}
 }

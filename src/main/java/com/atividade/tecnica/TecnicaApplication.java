@@ -12,8 +12,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.atividade.tecnica.entidades.Acomodacao;
 import com.atividade.tecnica.entidades.Cliente;
 import com.atividade.tecnica.entidades.Credenciais;
+import com.atividade.tecnica.entidades.Documento;
 import com.atividade.tecnica.enumeracao.Roles;
 import com.atividade.tecnica.enumeracao.TipoAcomodacao;
+import com.atividade.tecnica.enumeracao.TipoDocumento;
 import com.atividade.tecnica.repositorios.RepositorioAcomodacao;
 import com.atividade.tecnica.repositorios.RepositorioCliente;
 
@@ -91,6 +93,13 @@ public class TecnicaApplication implements CommandLineRunner{
 		Cliente admin = new Cliente();
 		Credenciais inf = new Credenciais();
 		String senha = "admin";
+		
+		Documento newDoc = new Documento();
+		
+		newDoc.setDataEmissao("25/05/2001");
+		newDoc.setNumero("25/02/2500");
+		newDoc.setTipo(TipoDocumento.CPF);
+		
 		List<Roles> roleArray = new ArrayList<>();
 		roleArray.add(Roles.ROLE_ADMIN);
 		inf.setEmail("Admin@bicho.com");

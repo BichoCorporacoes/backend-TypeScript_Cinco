@@ -69,7 +69,7 @@ public class ClienteControle {
 	@PostMapping("/cadastrar-funcionario")
 	public ResponseEntity<?> cadastrarCliente(@RequestBody ClienteRegisterDto usuarioDto) {
 		List<Cliente> todos = clienteServico.findAll();
-		Cliente existe = clienteServico.vereficarDuplicatas(todos, usuarioDto.getEmail());
+		Cliente existe = clienteServico.vereficarDuplicatas(todos, usuarioDto.getEmail().toString());
 		if(existe != null ) {
 			return new ResponseEntity<>("Funcionario com o email '" + usuarioDto.getEmail() + "' Já está cadastrado", HttpStatus.BAD_REQUEST);
 		}else {

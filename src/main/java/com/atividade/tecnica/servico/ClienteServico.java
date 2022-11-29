@@ -16,6 +16,7 @@ import com.atividade.tecnica.entidades.Endereco;
 import com.atividade.tecnica.entidades.Telefone;
 import com.atividade.tecnica.repositorios.RepositorioAcomodacao;
 import com.atividade.tecnica.repositorios.RepositorioCliente;
+import com.atividade.tecnica.repositorios.RepositorioCredencial;
 import com.atividade.tecnica.repositorios.RepositorioDocumento;
 import com.atividade.tecnica.repositorios.RepositorioEndereco;
 import com.atividade.tecnica.repositorios.RepositorioTelefone;
@@ -33,6 +34,8 @@ public class ClienteServico {
 	private RepositorioDocumento repositorioDocumento;
 	@Autowired
 	private RepositorioAcomodacao repositorioAcomodacao;
+	@Autowired
+	private RepositorioCredencial repositorioCredencial;
 
 	
 	// Clientes
@@ -53,11 +56,11 @@ public class ClienteServico {
 	public Cliente vereficarDuplicatas(List<Cliente> objetos, String identificador) {
 		Cliente usuario = null;
 		for (Cliente objeto : objetos) {
-			Credenciais credencial = objeto.getCredenciais();
-			String email = credencial.getEmail();
-			if (email.trim().equals(identificador.trim())) {
-				usuario = objeto;
-				break;
+			for(Credenciais existentes : repositorioCredencial.findAll()) {
+				if(existentes.getEmail().equals(identificador)) {
+					usuario = objeto;
+					break;
+				}
 			}
 		}
 		return usuario;
